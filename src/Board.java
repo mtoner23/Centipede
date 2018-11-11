@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseListener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputListener;
 
 public class Board extends JPanel implements Runnable, Commons {
 
@@ -29,7 +31,7 @@ public class Board extends JPanel implements Runnable, Commons {
     private int deaths = 0;
 
     private boolean ingame = true;
-    private final String explImg = "src/images/explosion.png";
+    private final String explImg = "src/images/spaceinvaders/explosion.png";
     private String message = "Game Over";
 
     private Thread animator;
@@ -42,6 +44,7 @@ public class Board extends JPanel implements Runnable, Commons {
     private void initBoard() {
 
         addKeyListener(new TAdapter());
+        addMouseListener(new Mouse());
         setFocusable(true);
         d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
         setBackground(Color.black);
