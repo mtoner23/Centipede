@@ -75,7 +75,7 @@ public class Board extends JPanel implements Runnable, Commons {
         }
 
         player = new Player();
-        shots = new ArrayList<Shot>();
+        shots = new ArrayList<>();
         centipede = new Centipede();
         //shot = new Shot();
 
@@ -130,10 +130,8 @@ public class Board extends JPanel implements Runnable, Commons {
         if (ingame) {
 
             g.drawLine(0, GROUND, BOARD_WIDTH, GROUND);
-            drawAliens(g);
             drawPlayer(g);
             drawShot(g);
-            drawBombing(g);
             drawCentipede(g);
         }
 
