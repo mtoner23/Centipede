@@ -1,11 +1,13 @@
 package com.centipede;
 
+import javax.swing.*;
 import java.awt.Image;
 
 public class Sprite {
 
     private boolean visible;
-    private Image image;
+    protected Image image;
+    protected Image revImage;
     protected int x;
     protected int y;
     protected boolean dying;
@@ -31,14 +33,23 @@ public class Sprite {
         this.visible = visible;
     }
 
-    public void setImage(Image image) {
+    public void setImage(String img) {
+        ImageIcon ii = new ImageIcon(img);
+        this.image = ii.getImage();
+    }
 
-        this.image = image;
+    public void setRevImage(String img) {
+        ImageIcon ii = new ImageIcon(img);
+        this.revImage = ii.getImage();
     }
 
     public Image getImage() {
 
         return image;
+    }
+
+    public Image getRevImage() {
+        return revImage;
     }
 
     public void setX(int x) {

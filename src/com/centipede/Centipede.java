@@ -1,13 +1,16 @@
 package com.centipede;
 
+import java.awt.geom.AffineTransform;
 import java.lang.reflect.Array;
 import java.util.*;
 
 public class Centipede implements Commons {
 
     public ArrayList<Segment> segments;
-    public int xdirection = -1;
-    public int ydirection = 0;
+    private final String segmentImg = "src/images/centipede/segment.png";
+    private final String headImg = "src/images/centipede/head.png";
+    private final String backHeadImg = "src/images/centipede/head_rotate.png";
+    private final String backSegmentImg = "src/images/centipede/segment_rotate.png";
     private final int INIT_X = 150;
     private final int INIT_Y = 5;
 
@@ -19,10 +22,12 @@ public class Centipede implements Commons {
 
         segments = new ArrayList<>();
 
-        for(int i = 0; i < size; i++){
-            segments.add(new Segment(x,y));
+        for(int i = 0; i < size - 1; i++) {
+            segments.add(new Segment(x, y, segmentImg, backSegmentImg));
             x += SEGMENT_WIDTH;
         }
+
+        segments.add(new Segment(x,y, headImg, backHeadImg));
     }
 
     public void act(){
@@ -35,20 +40,21 @@ public class Centipede implements Commons {
         for(i = 0; i < segments.size() - 1; i++) {
             segments.get(i).setX(segments.get(i + 1).getX());
             segments.get(i).setY(segments.get(i + 1).getY());
+            segments.get(i).direction = segments.get(i+1).direction;
         }
 
         Segment head = segments.get(i);
-        head.setX(head.getX() + (SEGMENT_SPEED) * xdirection);
+        head.setX(head.getX() + (SEGMENT_SPEED) * head.direction);
 
         if (head.getX() >= BOARD_WIDTH - BORDER_RIGHT) {
-            xdirection = -1;
-            head.setX(head.getX() + (SEGMENT_SPEED) * xdirection);
+            head.direction = -1;
+            head.setX(head.getX() + (SEGMENT_SPEED) * head.direction);
             head.setY(head.getY() + SEGMENT_HEIGHT);
         }
 
         if (head.getX() <= BORDER_LEFT) {
-            xdirection = 1;
-            head.setX(head.getX() + (SEGMENT_SPEED) * xdirection);
+            head.direction = 1;
+            head.setX(head.getX() + (SEGMENT_SPEED) * head.direction);
             head.setY(head.getY() + SEGMENT_HEIGHT);
         }
     }

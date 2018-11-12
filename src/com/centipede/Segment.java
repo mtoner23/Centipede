@@ -4,16 +4,24 @@ import javax.swing.ImageIcon;
 
 public class Segment extends Sprite {
 
-    private final String segmentImg = "src/images/spaceinvaders/alien.png";
+
     private Segment leftSegment;
     private Segment rightSegment;
+    public int direction = -1;
+    public int head = 0;
+    private int hit = 0;
 
-    public Segment(int x, int y) {
+    public Segment(int x, int y, String img, String revImg) {
         this.x = x;
         this.y = y;
 
-        ImageIcon ii = new ImageIcon(segmentImg);
-        setImage(ii.getImage());
+        setImage(img);
+        setRevImage(revImg);
+
+    }
+
+    public void flipSegment(){
+        //ImageIcon img = this.image;
     }
 
     public void setRightSegment(Segment rightSegment){

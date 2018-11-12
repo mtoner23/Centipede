@@ -10,7 +10,7 @@ public class Player extends Sprite implements Commons {
     private final int START_X = 270;
 
     private final String playerImg = "src/images/spaceinvaders/player.png";
-    private int width;
+    private int width = 0;
 
     public Player() {
 
@@ -19,11 +19,9 @@ public class Player extends Sprite implements Commons {
 
     private void initPlayer() {
 
-        ImageIcon ii = new ImageIcon(playerImg);
+        //width = getImage().getWidth(null);
 
-        width = ii.getImage().getWidth(null);
-
-        setImage(ii.getImage());
+        setImage(playerImg);
         setX(START_X);
         setY(START_Y);
     }

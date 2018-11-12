@@ -1,11 +1,6 @@
 package com.centipede;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.*;
 
 import java.util.ArrayList;
@@ -37,6 +32,8 @@ public class Board extends JPanel implements Runnable, Commons {
     private String message = "Game Over";
 
     private Thread animator;
+
+    //AffineTransform backup = g2d.getTransform();
 
     public Board() {
 
@@ -89,25 +86,14 @@ public class Board extends JPanel implements Runnable, Commons {
         }
     }
 
-    public void drawAliens(Graphics g) {
-
-        for (Alien alien: aliens) {
-
-            if (alien.isVisible()) {
-
-                g.drawImage(alien.getImage(), alien.getX(), alien.getY(), this);
-            }
-
-            if (alien.isDying()) {
-
-                alien.die();
-            }
-        }
-    }
 
     public void drawCentipede(Graphics g) {
         for(Segment seg: centipede.segments) {
-            g.drawImage(seg.getImage(), seg.getX(), seg.getY(),this);
+            if(seg.direction == -1) {
+                g.drawImage(seg.getImage(), seg.getX(), seg.getY(), this);
+            }else{
+                g.drawImage(seg.getRevImage(), seg.getX(), seg.getY(), this);
+            }
         }
     }
 
@@ -132,18 +118,6 @@ public class Board extends JPanel implements Runnable, Commons {
         }
     }
 
-    public void drawBombing(Graphics g) {
-
-        for (Alien a : aliens) {
-
-            Alien.Bomb b = a.getBomb();
-
-            if (!b.isDestroyed()) {
-
-                g.drawImage(b.getImage(), b.getX(), b.getY(), this);
-            }
-        }
-    }
 
     @Override
     public void paintComponent(Graphics g) {
@@ -197,9 +171,9 @@ public class Board extends JPanel implements Runnable, Commons {
         }
 
         // player
-        player.act();
+        //player.act();
 
-        if(wait == 5) {
+        if(wait == 7) {
             centipede.act();
             wait = 0;
         }
@@ -223,9 +197,8 @@ public class Board extends JPanel implements Runnable, Commons {
                             && shotX <= (alienX + ALIEN_WIDTH)
                             && shotY >= (alienY)
                             && shotY <= (alienY + ALIEN_HEIGHT)) {
-                        ImageIcon ii
-                                = new ImageIcon(explImg);
-                        alien.setImage(ii.getImage());
+
+                        alien.setImage(explImg);
                         alien.setDying(true);
                         deaths++;
                         iter.remove();
