@@ -24,11 +24,13 @@ public class Board extends JPanel implements Runnable, Commons {
     private ArrayList<Shot> shots;
     private Player player;
     private Shot shot;
+    private Centipede centipede;
 
     private final int ALIEN_INIT_X = 150;
     private final int ALIEN_INIT_Y = 5;
     private int direction = -1;
     private int deaths = 0;
+    private int wait = 0;
 
     private boolean ingame = true;
     private final String explImg = "src/images/spaceinvaders/explosion.png";
@@ -77,6 +79,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
         player = new Player();
         shots = new ArrayList<Shot>();
+        centipede = new Centipede();
         //shot = new Shot();
 
         if (animator == null || !ingame) {
@@ -99,6 +102,12 @@ public class Board extends JPanel implements Runnable, Commons {
 
                 alien.die();
             }
+        }
+    }
+
+    public void drawCentipede(Graphics g) {
+        for(Segment seg: centipede.segments) {
+            g.drawImage(seg.getImage(), seg.getX(), seg.getY(),this);
         }
     }
 
@@ -151,6 +160,7 @@ public class Board extends JPanel implements Runnable, Commons {
             drawPlayer(g);
             drawShot(g);
             drawBombing(g);
+            drawCentipede(g);
         }
 
         Toolkit.getDefaultToolkit().sync();
@@ -188,6 +198,13 @@ public class Board extends JPanel implements Runnable, Commons {
 
         // player
         player.act();
+
+        if(wait == 5) {
+            centipede.act();
+            wait = 0;
+        }
+
+        wait++;
 
         // shot
         ListIterator<Shot> iter = shots.listIterator();
@@ -271,46 +288,46 @@ public class Board extends JPanel implements Runnable, Commons {
         // bombs
         Random generator = new Random();
 
-        for (Alien alien: aliens) {
-
-            int shot = generator.nextInt(15);
-            Alien.Bomb b = alien.getBomb();
-
-            if (shot == CHANCE && alien.isVisible() && b.isDestroyed()) {
-
-                b.setDestroyed(false);
-                b.setX(alien.getX());
-                b.setY(alien.getY());
-            }
-
-            int bombX = b.getX();
-            int bombY = b.getY();
-            int playerX = player.getX();
-            int playerY = player.getY();
-
-            if (player.isVisible() && !b.isDestroyed()) {
-
-                if (bombX >= (playerX)
-                        && bombX <= (playerX + PLAYER_WIDTH)
-                        && bombY >= (playerY)
-                        && bombY <= (playerY + PLAYER_HEIGHT)) {
-                    ImageIcon ii
-                            = new ImageIcon(explImg);
-                    player.setImage(ii.getImage());
-                    player.setDying(true);
-                    b.setDestroyed(true);
-                }
-            }
-
-            if (!b.isDestroyed()) {
-
-                b.setY(b.getY() + 1);
-
-                if (b.getY() >= GROUND - BOMB_HEIGHT) {
-                    b.setDestroyed(true);
-                }
-            }
-        }
+//        for (Alien alien: aliens) {
+//
+//            int shot = generator.nextInt(15);
+//            Alien.Bomb b = alien.getBomb();
+//
+//            if (shot == CHANCE && alien.isVisible() && b.isDestroyed()) {
+//
+//                b.setDestroyed(false);
+//                b.setX(alien.getX());
+//                b.setY(alien.getY());
+//            }
+//
+//            int bombX = b.getX();
+//            int bombY = b.getY();
+//            int playerX = player.getX();
+//            int playerY = player.getY();
+//
+//            if (player.isVisible() && !b.isDestroyed()) {
+//
+//                if (bombX >= (playerX)
+//                        && bombX <= (playerX + PLAYER_WIDTH)
+//                        && bombY >= (playerY)
+//                        && bombY <= (playerY + PLAYER_HEIGHT)) {
+//                    ImageIcon ii
+//                            = new ImageIcon(explImg);
+//                    player.setImage(ii.getImage());
+//                    player.setDying(true);
+//                    b.setDestroyed(true);
+//                }
+//            }
+//
+//            if (!b.isDestroyed()) {
+//
+//                b.setY(b.getY() + 1);
+//
+//                if (b.getY() >= GROUND - BOMB_HEIGHT) {
+//                    b.setDestroyed(true);
+//                }
+//            }
+//        }
     }
 
     @Override
@@ -380,7 +397,6 @@ public class Board extends JPanel implements Runnable, Commons {
         public void mouseMoved(MouseEvent e){
             player.setX(e.getX());
             player.setY(e.getY());
-            System.out.println("Moved");
         }
 
         @Override
