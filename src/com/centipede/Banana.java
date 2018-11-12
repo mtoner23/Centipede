@@ -1,9 +1,9 @@
-package com.zetcode;
+package com.centipede;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-public class Mouse implements MouseListener {
+public class Banana implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {

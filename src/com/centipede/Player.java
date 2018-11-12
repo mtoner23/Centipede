@@ -1,4 +1,4 @@
-package com.zetcode;
+package com.centipede;
 
 import java.awt.event.KeyEvent;
 
@@ -30,7 +30,7 @@ public class Player extends Sprite implements Commons {
 
     public void act() {
 
-        x += dx;
+        //x += dx;
 
         if (x <= 2) {
             x = 2;
@@ -55,6 +55,7 @@ public class Player extends Sprite implements Commons {
             dx = 2;
         }
     }
+
 
     public void keyReleased(KeyEvent e) {
 

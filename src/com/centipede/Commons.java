@@ -1,4 +1,4 @@
-package com.zetcode;
+package com.centipede;
 
 public interface Commons {
 
