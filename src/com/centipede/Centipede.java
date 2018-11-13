@@ -1,5 +1,6 @@
 package com.centipede;
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -11,20 +12,22 @@ public class Centipede implements Commons {
     private final String headImg = "src/images/centipede/head.png";
     private final String backHeadImg = "src/images/centipede/head_rotate.png";
     private final String backSegmentImg = "src/images/centipede/segment_rotate.png";
+    public int size = CENTIPEDE_LENGTH;
     private final int INIT_X = 150;
     private final int INIT_Y = 5;
 
     public Centipede(){
-        this(CENTIPEDE_LENGTH,150,5);
+        this(CENTIPEDE_LENGTH,BOARD_WIDTH,10);
     };
 
-    public Centipede(int size, int x, int y){
+    public Centipede(int s, int x, int y){
 
+        this.size = s;
         segments = new ArrayList<>();
 
-        for(int i = 0; i < size - 1; i++) {
+        for(int i = 0; i < s - 1; i++) {
             segments.add(new Segment(x, y, segmentImg, backSegmentImg));
-            x += SEGMENT_WIDTH;
+            x -= SEGMENT_WIDTH;
         }
 
         segments.add(new Segment(x,y, headImg, backHeadImg));
@@ -33,7 +36,6 @@ public class Centipede implements Commons {
     public void act(){
 
 
-        int direction = 1;
 
         //FOr loop thorugh all segments and then move the last segment. better way to do it
         int i;
@@ -44,18 +46,22 @@ public class Centipede implements Commons {
         }
 
         Segment head = segments.get(i);
-        head.setX(head.getX() + (SEGMENT_SPEED) * head.direction);
+        head.setX(head.getX() + (SEGMENT_WIDTH) * head.direction);
 
-        if (head.getX() >= BOARD_WIDTH - BORDER_RIGHT) {
+        if (head.getX() >= BOARD_WIDTH - BORDER_RIGHT || head.direction == 1 && grid[head.getY()/GRID_SIZE][head.getX()/GRID_SIZE] == 1) {
             head.direction = -1;
-            head.setX(head.getX() + (SEGMENT_SPEED) * head.direction);
+            head.setX(head.getX() + (SEGMENT_WIDTH) * head.direction);
             head.setY(head.getY() + SEGMENT_HEIGHT);
         }
 
-        if (head.getX() <= BORDER_LEFT) {
+        if (head.getX() <= BORDER_LEFT || head.direction == -1 && grid[head.getY()/GRID_SIZE][head.getX()/GRID_SIZE] == 1) {
             head.direction = 1;
-            head.setX(head.getX() + (SEGMENT_SPEED) * head.direction);
+            head.setX(head.getX() + (SEGMENT_WIDTH) * head.direction);
             head.setY(head.getY() + SEGMENT_HEIGHT);
+        }
+
+        if(head.getY() >= BOARD_HEIGHT - PLAYER_AREA_HEIGHT){
+            head.setY(BOARD_HEIGHT - PLAYER_AREA_HEIGHT - GRID_SIZE);
         }
     }
 

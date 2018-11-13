@@ -12,22 +12,31 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
+import static java.awt.event.KeyEvent.VK_N;
+import static java.awt.event.KeyEvent.VK_Q;
+import static java.awt.event.KeyEvent.VK_R;
+
 public class Board extends JPanel implements Runnable, Commons {
 
     private Dimension d;
-    private ArrayList<Alien> aliens;
+    private ArrayList<Mushroom> mushrooms;
     private ArrayList<Shot> shots;
     private Player player;
     private Shot shot;
     private Centipede centipede;
+    private int lives = 3;
 
     private final int ALIEN_INIT_X = 150;
     private final int ALIEN_INIT_Y = 5;
     private int direction = -1;
-    private int deaths = 0;
+    //private int deaths = 0;
     private int wait = 0;
+    private int speed = 4;
+
+
 
     private boolean ingame = true;
+    private boolean restart = false;
     private final String explImg = "src/images/spaceinvaders/explosion.png";
     private String message = "Game Over";
 
@@ -36,13 +45,14 @@ public class Board extends JPanel implements Runnable, Commons {
     //AffineTransform backup = g2d.getTransform();
 
     public Board() {
-
         initBoard();
     }
 
     private void initBoard() {
 
-        addKeyListener(new TAdapter());
+        System.setProperty("apple.awt.fullscreenhidecursor","true");
+
+        addKeyListener(new Keyboard());
         Mouse m = new Mouse();
         addMouseMotionListener(m);
         addMouseListener(m);
@@ -64,13 +74,19 @@ public class Board extends JPanel implements Runnable, Commons {
 
     public void gameInit() {
 
-        aliens = new ArrayList<>();
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 6; j++) {
-
-                Alien alien = new Alien(ALIEN_INIT_X + 18 * j, ALIEN_INIT_Y + 18 * i);
-                aliens.add(alien);
+        mushrooms = new ArrayList<>();
+        Random r = new Random();
+        for (int i = 2 * GRID_SIZE; i < BOARD_HEIGHT - PLAYER_AREA_HEIGHT; i += GRID_SIZE) {
+            for (int j = BORDER_LEFT + GRID_SIZE; j < BOARD_WIDTH - BORDER_RIGHT - GRID_SIZE; j += GRID_SIZE) {
+                if(r.nextInt(CHANCE) == CHANCE - 1) {
+                    if(grid[i/GRID_SIZE - 1][j/GRID_SIZE - 1] == 0 && grid[i/GRID_SIZE - 1][j/GRID_SIZE + 1] == 0) {
+                        Mushroom mushroom = new Mushroom(j, i);
+                        mushrooms.add(mushroom);
+                        grid[i / GRID_SIZE][j / GRID_SIZE] = 1;
+                    }
+                }else{
+                    grid[ i/GRID_SIZE ][ j/GRID_SIZE ] = 0;
+                }
             }
         }
 
@@ -89,11 +105,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
     public void drawCentipede(Graphics g) {
         for(Segment seg: centipede.segments) {
-            if(seg.direction == -1) {
-                g.drawImage(seg.getImage(), seg.getX(), seg.getY(), this);
-            }else{
-                g.drawImage(seg.getRevImage(), seg.getX(), seg.getY(), this);
-            }
+            g.drawImage(seg.getImage(), seg.getX(), seg.getY(), this);
         }
     }
 
@@ -112,9 +124,14 @@ public class Board extends JPanel implements Runnable, Commons {
     }
 
     public void drawShot(Graphics g) {
-
         for(Shot s : shots){
             g.drawImage(s.getImage(), s.getX(), s.getY(), this);
+        }
+    }
+
+    public void drawMushrooms(Graphics g){
+        for(Mushroom m : mushrooms){
+            g.drawImage(m.getImage(), m.getX(), m.getY(), this);
         }
     }
 
@@ -129,19 +146,37 @@ public class Board extends JPanel implements Runnable, Commons {
 
         if (ingame) {
 
-            g.drawLine(0, GROUND, BOARD_WIDTH, GROUND);
+            //g.drawLine(0, GROUND, BOARD_WIDTH, GROUND);
+            drawGrid(g);
             drawPlayer(g);
             drawShot(g);
             drawCentipede(g);
+            drawMushrooms(g);
+
         }
 
         Toolkit.getDefaultToolkit().sync();
         g.dispose();
     }
 
+    private void drawGrid(Graphics g){
+        ImageIcon ii = new ImageIcon("src/images/centipede/dot.png");
+        boolean dot = true;
+
+        for(int i = 0; i < grid.length; i++){
+            for(int j = 0; j < grid[0].length; j++){
+                if(grid[i][j] == 1 || dot){
+                    g.drawImage(ii.getImage(),j*GRID_SIZE,i*GRID_SIZE, this );
+                }
+            }
+        }
+    }
+
     public void gameOver() {
 
         Graphics g = this.getGraphics();
+
+        setCursor(Cursor.getDefaultCursor());
 
         g.setColor(Color.black);
         g.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
@@ -162,20 +197,18 @@ public class Board extends JPanel implements Runnable, Commons {
 
     public void animationCycle() {
 
-        if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
-
+        if (lives == 0) {
             ingame = false;
-            message = "Game won!";
+            message = "Game Over!";
         }
 
         // player
-        //player.act();
 
-        if(wait == 7) {
+        //Centipede Movement
+        if(wait == speed) {
             centipede.act();
             wait = 0;
         }
-
         wait++;
 
         // shot
@@ -185,27 +218,32 @@ public class Board extends JPanel implements Runnable, Commons {
             int shotX = s.getX();
             int shotY = s.getY();
 
-            for (Alien alien: aliens) {
+            ListIterator<Mushroom> mushIter = mushrooms.listIterator();
+            while (mushIter.hasNext()) {
+                Mushroom mush = mushIter.next();
 
-                int alienX = alien.getX();
-                int alienY = alien.getY();
+                int mushX = mush.getX();
+                int mushY = mush.getY();
 
-                if (alien.isVisible() && s.isVisible()) {
-                    if (shotX >= (alienX)
-                            && shotX <= (alienX + ALIEN_WIDTH)
-                            && shotY >= (alienY)
-                            && shotY <= (alienY + ALIEN_HEIGHT)) {
+                if (mush.isVisible() && s.isVisible()) {
+                    if (shotX >= (mushX)
+                            && shotX <= (mushX + ALIEN_WIDTH)
+                            && shotY >= (mushY)
+                            && shotY <= (mushY + ALIEN_HEIGHT)) {
 
-                        alien.setImage(explImg);
-                        alien.setDying(true);
-                        deaths++;
+                        mush.hit();
+                        if(mush.isDying()){
+                            mushIter.remove();
+                            grid[mushY/GRID_SIZE][mushX/GRID_SIZE] = 0;
+                        }
                         iter.remove();
+                        break;
                     }
                 }
             }
 
             int y = s.getY();
-            y -= 4;
+            y -= SHOT_SPEED;
 
             if (y < 0) {
                 iter.remove();
@@ -216,89 +254,10 @@ public class Board extends JPanel implements Runnable, Commons {
 
         // aliens
 
-        for (Alien alien: aliens) {
-
-            int x = alien.getX();
-
-            if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
-
-                direction = -1;
-
-                for (Alien a2 : aliens) {
-
-                    a2.setY(a2.getY() + GO_DOWN);
-                }
-            }
-
-            if (x <= BORDER_LEFT && direction != 1) {
-
-                direction = 1;
-
-                for (Alien a : aliens) {
-
-                    a.setY(a.getY() + GO_DOWN);
-                }
-            }
-        }
-
-        for (Alien alien : aliens) {
-
-            if (alien.isVisible()) {
-
-                int y = alien.getY();
-
-                if (y > GROUND - ALIEN_HEIGHT) {
-                    ingame = false;
-                    message = "Invasion!";
-                }
-
-                alien.act(direction);
-            }
-        }
 
         // bombs
-        Random generator = new Random();
 
-//        for (Alien alien: aliens) {
-//
-//            int shot = generator.nextInt(15);
-//            Alien.Bomb b = alien.getBomb();
-//
-//            if (shot == CHANCE && alien.isVisible() && b.isDestroyed()) {
-//
-//                b.setDestroyed(false);
-//                b.setX(alien.getX());
-//                b.setY(alien.getY());
-//            }
-//
-//            int bombX = b.getX();
-//            int bombY = b.getY();
-//            int playerX = player.getX();
-//            int playerY = player.getY();
-//
-//            if (player.isVisible() && !b.isDestroyed()) {
-//
-//                if (bombX >= (playerX)
-//                        && bombX <= (playerX + PLAYER_WIDTH)
-//                        && bombY >= (playerY)
-//                        && bombY <= (playerY + PLAYER_HEIGHT)) {
-//                    ImageIcon ii
-//                            = new ImageIcon(explImg);
-//                    player.setImage(ii.getImage());
-//                    player.setDying(true);
-//                    b.setDestroyed(true);
-//                }
-//            }
-//
-//            if (!b.isDestroyed()) {
-//
-//                b.setY(b.getY() + 1);
-//
-//                if (b.getY() >= GROUND - BOMB_HEIGHT) {
-//                    b.setDestroyed(true);
-//                }
-//            }
-//        }
+
     }
 
     @Override
@@ -309,6 +268,11 @@ public class Board extends JPanel implements Runnable, Commons {
         beforeTime = System.currentTimeMillis();
 
         while (ingame) {
+            if(restart){
+                //gameOver();
+                gameInit();
+                restart = false;
+            }
 
             repaint();
             animationCycle();
@@ -330,6 +294,7 @@ public class Board extends JPanel implements Runnable, Commons {
         }
 
         gameOver();
+
     }
 
     private class Mouse implements MouseMotionListener,MouseListener {
@@ -372,35 +337,26 @@ public class Board extends JPanel implements Runnable, Commons {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-
+            player.setX(e.getX());
+            player.setY(e.getY());
         }
     }
 
-    private class TAdapter extends KeyAdapter {
+    private class Keyboard extends KeyAdapter {
 
         @Override
         public void keyReleased(KeyEvent e) {
 
-            player.keyReleased(e);
         }
 
         @Override
         public void keyPressed(KeyEvent e) {
-
-            player.keyPressed(e);
-
-            int x = player.getX();
-            int y = player.getY();
-
             int key = e.getKeyCode();
 
-            if (key == KeyEvent.VK_SPACE) {
-
-                if (ingame) {
-                    if (!shot.isVisible()) {
-                        shot = new Shot(x, y);
-                    }
-                }
+            if(key == VK_R){
+                restart = true;
+            }else if(key == VK_Q){
+                ingame = false;
             }
         }
     }

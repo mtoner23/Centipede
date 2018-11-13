@@ -9,7 +9,7 @@ public class Player extends Sprite implements Commons {
     private final int START_Y = 280;
     private final int START_X = 270;
 
-    private final String playerImg = "src/images/spaceinvaders/player.png";
+    private final String playerImg = "src/images/centipede/player_2x.png";
     private int width = 0;
 
     public Player() {

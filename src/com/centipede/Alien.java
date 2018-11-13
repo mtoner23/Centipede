@@ -37,7 +37,6 @@ public class Alien extends Sprite {
         private boolean destroyed;
 
         public Bomb(int x, int y) {
-
             initBomb(x, y);
         }
 

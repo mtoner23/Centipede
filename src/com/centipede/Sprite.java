@@ -7,11 +7,11 @@ public class Sprite {
 
     private boolean visible;
     protected Image image;
-    protected Image revImage;
     protected int x;
     protected int y;
     protected boolean dying;
     protected int dx;
+    protected int hit = 0;
 
     public Sprite() {
 
@@ -38,18 +38,9 @@ public class Sprite {
         this.image = ii.getImage();
     }
 
-    public void setRevImage(String img) {
-        ImageIcon ii = new ImageIcon(img);
-        this.revImage = ii.getImage();
-    }
-
     public Image getImage() {
 
         return image;
-    }
-
-    public Image getRevImage() {
-        return revImage;
     }
 
     public void setX(int x) {
@@ -70,6 +61,10 @@ public class Sprite {
     public int getX() {
 
         return x;
+    }
+
+    public void hit(){
+        this.hit += 1;
     }
 
     public void setDying(boolean dying) {

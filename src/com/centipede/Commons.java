@@ -2,22 +2,22 @@ package com.centipede;
 
 public interface Commons {
 
-    int BOARD_WIDTH = 500;
-    int BOARD_HEIGHT = 800;
-    int GROUND = 290;
-    int BOMB_HEIGHT = 5;
+
+    int BOARD_WIDTH = 400;
+    int BOARD_HEIGHT = 700;
+    int GRID_SIZE = 10;
     int ALIEN_HEIGHT = 12;
     int ALIEN_WIDTH = 12;
-    int BORDER_RIGHT = 20;
-    int BORDER_LEFT = 20;
-    int GO_DOWN = 15;
-    int NUMBER_OF_ALIENS_TO_DESTROY = 24;
-    int CHANCE = 5;
+    int BORDER_RIGHT = 10;
+    int BORDER_LEFT = 10;
+    int CHANCE = 6;
     int DELAY = 17;
-    int PLAYER_WIDTH = 15;
-    int PLAYER_HEIGHT = 10;
+    int PLAYER_WIDTH = 14;
+    int PLAYER_HEIGHT = 16;
     int CENTIPEDE_LENGTH = 10;
-    int SEGMENT_HEIGHT = 10;
-    int SEGMENT_WIDTH = 10;
-    int SEGMENT_SPEED = 10;
+    int SEGMENT_HEIGHT = GRID_SIZE;
+    int SEGMENT_WIDTH = GRID_SIZE;
+    int SHOT_SPEED = 7;
+    int PLAYER_AREA_HEIGHT = 100;
+    int [][] grid = new int[BOARD_HEIGHT/GRID_SIZE][BOARD_WIDTH/GRID_SIZE];
 }
