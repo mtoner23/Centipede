@@ -12,15 +12,11 @@ public class Shot extends Sprite {
     }
 
     public Shot(int x, int y) {
-
-        initShot(x, y);
-    }
-
-    private void initShot(int x, int y) {
-
         setImage(shotImg);
-
-        setX(x + H_SPACE);
-        setY(y - V_SPACE);
+        this.x = x + H_SPACE;
+        this.y = y - V_SPACE;
+        this.width = 1;
+        this.height = 6;
     }
+
 }

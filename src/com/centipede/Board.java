@@ -17,8 +17,8 @@ public class Board extends JPanel implements Runnable, Commons {
     private Vector<Mushroom> mushrooms;
     private Vector<Shot> shots;
     private Player player;
-    private Shot shot;
     private Centipede centipede;
+    private Spider spider;
 
     private int score = 0;
     private int wait = 0;
@@ -87,7 +87,7 @@ public class Board extends JPanel implements Runnable, Commons {
         player = new Player();
         shots = new Vector<>();
         centipede = new Centipede();
-        //shot = new Shot();
+        spider = new Spider();
 
         if (animator == null || !ingame) {
 
@@ -98,8 +98,8 @@ public class Board extends JPanel implements Runnable, Commons {
 
 
     public void drawCentipede(Graphics g) {
-        for(Segment seg: centipede.segments) {
-            if(!seg.isDying()) {
+        for (Segment seg : centipede.segments) {
+            if (!seg.isDying()) {
                 g.drawImage(seg.getImage(), seg.getX(), seg.getY(), this);
             }
         }
@@ -143,7 +143,11 @@ public class Board extends JPanel implements Runnable, Commons {
 
         g.setColor(Color.white);
         g.setFont(small);
-        g.drawString(Integer.toString(score),4*PLAYER_WIDTH,PLAYER_HEIGHT-2);
+        g.drawString(Integer.toString(score),5*PLAYER_WIDTH,PLAYER_HEIGHT-2);
+    }
+
+    public void drawSpider(Graphics g){
+        g.drawImage(spider.getImage(),spider.getX(),spider.getY(),this);
     }
 
 
@@ -165,6 +169,7 @@ public class Board extends JPanel implements Runnable, Commons {
             drawMushrooms(g);
             drawLives(g);
             drawScore(g);
+            drawSpider(g);
 
         }
 
@@ -235,46 +240,54 @@ public class Board extends JPanel implements Runnable, Commons {
         }
         wait++;
 
+        spider.act(player.getX(),player.getY());
+
+
         // shot
-        ListIterator<Shot> iter = shots.listIterator();
-        while(iter.hasNext()) {
-            Shot s = iter.next();
-            int shotX = s.getX();
-            int shotY = s.getY();
-            if(grid[shotY/GRID_SIZE][shotX/GRID_SIZE] == 1){
-                        Mushroom mush = findMushroom(shotX/GRID_SIZE,shotY/GRID_SIZE);
-                        mush.hit();
-                        score += 1;
-                        if(mush.isDying()){
-                            score += 4;
-                            mushrooms.remove(mush);
-                            grid[shotY/GRID_SIZE][shotX/GRID_SIZE] = 0;
-                        }
-                        iter.remove();
-            }else {
-                for (Segment seg : centipede.segments) {
-                    if (seg.getY() / GRID_SIZE == shotY / GRID_SIZE && seg.getX() / GRID_SIZE == shotX / GRID_SIZE) {
-                        seg.hit();
-                        score += 2;
-                        if (seg.isDying()) {
-                            score += 3;
-                        }
-                        iter.remove();
+            Shot delete = null;
+            for(Shot s: shots) {
+                int shotX = s.getX();
+                int shotY = s.getY();
+                if (grid[shotY / GRID_SIZE][shotX / GRID_SIZE] == 1) {
+                    Mushroom mush = findMushroom(shotX / GRID_SIZE, shotY / GRID_SIZE);
+                    mush.hit();
+                    score += 1;
+                    if (mush.isDying()) {
+                        score += 4;
+                        mushrooms.remove(mush);
+                        grid[shotY / GRID_SIZE][shotX / GRID_SIZE] = 0;
                     }
+                    delete = s;
+                    break;
+                } else {
+                        int hit_index = 0;
+                        boolean hit = false;
+                        for (Segment seg : centipede.segments) {
+                            if (seg.getY() / GRID_SIZE == shotY / GRID_SIZE && seg.getX() / GRID_SIZE == shotX / GRID_SIZE) {
+                                seg.hit();
+                                score += 2;
+                                delete = s;
+                                hit = true;
+                                break;
+                            }
+                            hit_index++;
+                        }
+                        if(hit){
+                            centipede.split(hit_index);
+                        }
+                }
+                int y = s.getY();
+                y -= SHOT_SPEED;
+                if (y < 0) {
+                    delete = s;
+                    break;
+                } else {
+                    s.setY(y);
                 }
             }
-
-
-
-            int y = s.getY();
-            y -= SHOT_SPEED;
-
-            if (y < 0) {
-                iter.remove();
-            } else {
-                s.setY(y);
+            if(delete != null){
+                shots.remove(delete);
             }
-        }
 
         if(!invincible) {
             Rectangle pR = player.getBounds();
@@ -358,6 +371,7 @@ public class Board extends JPanel implements Runnable, Commons {
         public void mousePressed(MouseEvent e) {
             int x = player.getX();
             int y = player.getY();
+
 
             if (ingame) {
                 shots.add(new Shot(x, y));
