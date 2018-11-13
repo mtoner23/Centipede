@@ -19,17 +19,10 @@ public class Board extends JPanel implements Runnable, Commons {
     private Player player;
     private Shot shot;
     private Centipede centipede;
+
     private int score = 0;
-
-
-    private final int ALIEN_INIT_X = 150;
-    private final int ALIEN_INIT_Y = 5;
-    private int direction = -1;
-    //private int deaths = 0;
     private int wait = 0;
     private int speed = INIT_SPEED;
-
-
 
     private boolean ingame = true;
     private boolean restart = false;
@@ -74,6 +67,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
         mushrooms = new Vector<>();
         Random r = new Random();
+        score = 0;
         boolean found = false;
         for (int i = 3 * GRID_SIZE; i < BOARD_HEIGHT - PLAYER_AREA_HEIGHT; i += GRID_SIZE) {
             for (int j = BORDER_LEFT + GRID_SIZE; j < BOARD_WIDTH - BORDER_RIGHT - GRID_SIZE; j += GRID_SIZE) {
@@ -142,6 +136,15 @@ public class Board extends JPanel implements Runnable, Commons {
             g.drawImage(player.getImage(),BORDER_RIGHT + i * PLAYER_WIDTH, 0,this);
         }
     }
+    public void drawScore(Graphics g){
+
+        Font small = new Font("Helvetica", Font.BOLD, PLAYER_HEIGHT);
+        FontMetrics metr = this.getFontMetrics(small);
+
+        g.setColor(Color.white);
+        g.setFont(small);
+        g.drawString(Integer.toString(score),4*PLAYER_WIDTH,PLAYER_HEIGHT-2);
+    }
 
 
     @Override
@@ -161,6 +164,7 @@ public class Board extends JPanel implements Runnable, Commons {
             drawCentipede(g);
             drawMushrooms(g);
             drawLives(g);
+            drawScore(g);
 
         }
 
@@ -272,13 +276,14 @@ public class Board extends JPanel implements Runnable, Commons {
             }
         }
 
-        if(invincible) {
+        if(!invincible) {
             Rectangle pR = player.getBounds();
             for (Segment seg : centipede.segments) {
                 Rectangle sR = seg.getBounds();
                 if (pR.intersects(sR)) {
                     player.hit();
-                    invincible = true;
+                    restore();
+                    break;
                 }
             }
         }
@@ -320,6 +325,15 @@ public class Board extends JPanel implements Runnable, Commons {
         }
 
         gameOver();
+
+    }
+
+    private void restore(){
+        for(Mushroom m : mushrooms){
+            m.restore();
+        }
+        centipede = new Centipede();
+        shots = new Vector<>();
 
     }
 
