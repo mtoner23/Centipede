@@ -3,70 +3,28 @@ package com.centipede;
 import java.awt.event.KeyEvent;
 
 import javax.swing.ImageIcon;
+import java.awt.Robot;
 
 public class Player extends Sprite implements Commons {
 
-    private final int START_Y = 280;
-    private final int START_X = 270;
-
     private final String playerImg = "src/images/centipede/player_2x.png";
-    private int width = 0;
+    public int lives = 3;
+    //Robot robot = new Robot();
 
     public Player() {
-
-        initPlayer();
-    }
-
-    private void initPlayer() {
-
-        //width = getImage().getWidth(null);
-
         setImage(playerImg);
-        setX(START_X);
-        setY(START_Y);
+        this.width = PLAYER_WIDTH;
+        this.height = PLAYER_HEIGHT;
+        this.x = START_X;
+        this.y = START_Y;
     }
 
-    public void act() {
+    public void hit(){
+        this.x = START_X;
+        this.y = START_Y;
+        //robot.mouseMove(x,y);
 
-        //x += dx;
-
-        if (x <= 2) {
-            x = 2;
-        }
-
-        if (x >= BOARD_WIDTH - 2 * width) {
-            x = BOARD_WIDTH - 2 * width;
-        }
+        lives -= 1;
     }
 
-    public void keyPressed(KeyEvent e) {
-
-        int key = e.getKeyCode();
-
-        if (key == KeyEvent.VK_LEFT) {
-
-            dx = -2;
-        }
-
-        if (key == KeyEvent.VK_RIGHT) {
-
-            dx = 2;
-        }
-    }
-
-
-    public void keyReleased(KeyEvent e) {
-
-        int key = e.getKeyCode();
-
-        if (key == KeyEvent.VK_LEFT) {
-
-            dx = 0;
-        }
-
-        if (key == KeyEvent.VK_RIGHT) {
-
-            dx = 0;
-        }
-    }
 }

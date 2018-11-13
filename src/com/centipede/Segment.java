@@ -17,6 +17,8 @@ public class Segment extends Sprite {
     public Segment(int x, int y, String img, String revImg) {
         this.x = x;
         this.y = y;
+        this.width = 10;
+        this.height = 10;
 
         setImage(img);
         setRevImage(revImg);

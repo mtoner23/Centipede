@@ -2,6 +2,7 @@ package com.centipede;
 
 import javax.swing.*;
 import java.awt.Image;
+import java.awt.Rectangle;
 
 public class Sprite {
 
@@ -12,6 +13,8 @@ public class Sprite {
     protected boolean dying;
     protected int dx;
     protected int hit = 0;
+    protected int width = 0;
+    protected int height = 0;
 
     public Sprite() {
 
@@ -68,8 +71,11 @@ public class Sprite {
     }
 
     public void setDying(boolean dying) {
-
         this.dying = dying;
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
     }
 
     public boolean isDying() {

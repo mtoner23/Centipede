@@ -3,6 +3,7 @@ package com.centipede;
 public interface Commons {
 
 
+
     int BOARD_WIDTH = 400;
     int BOARD_HEIGHT = 700;
     int GRID_SIZE = 10;
@@ -18,7 +19,9 @@ public interface Commons {
     int SEGMENT_HEIGHT = GRID_SIZE;
     int SEGMENT_WIDTH = GRID_SIZE;
     int SHOT_SPEED = 7;
-    int INIT_SPEED = 6;
+    int INIT_SPEED = 2;
     int PLAYER_AREA_HEIGHT = 100;
+    int START_Y = BOARD_HEIGHT - PLAYER_AREA_HEIGHT - GRID_SIZE;
+    int START_X = BOARD_WIDTH / 2;
     int [][] grid = new int[BOARD_HEIGHT/GRID_SIZE][BOARD_WIDTH/GRID_SIZE];
 }

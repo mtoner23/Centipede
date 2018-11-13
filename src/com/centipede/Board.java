@@ -19,7 +19,6 @@ public class Board extends JPanel implements Runnable, Commons {
     private Player player;
     private Shot shot;
     private Centipede centipede;
-    private int lives = 3;
     private int score = 0;
 
 
@@ -35,6 +34,7 @@ public class Board extends JPanel implements Runnable, Commons {
     private boolean ingame = true;
     private boolean restart = false;
     private boolean pause = false;
+    private boolean invincible = false;
     private final String explImg = "src/images/spaceinvaders/explosion.png";
     private String message = "Game Over";
 
@@ -138,7 +138,7 @@ public class Board extends JPanel implements Runnable, Commons {
     }
 
     public void drawLives(Graphics g){
-        for(int i = 0; i < lives; i++){
+        for(int i = 0; i < player.lives; i++){
             g.drawImage(player.getImage(),BORDER_RIGHT + i * PLAYER_WIDTH, 0,this);
         }
     }
@@ -217,7 +217,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
     public void animationCycle() {
 
-        if (lives == 0) {
+        if (player.lives == 0) {
             ingame = false;
             message = "Game Over!";
         }
@@ -254,12 +254,13 @@ public class Board extends JPanel implements Runnable, Commons {
                         score += 2;
                         if (seg.isDying()) {
                             score += 3;
-
                         }
                         iter.remove();
                     }
                 }
             }
+
+
 
             int y = s.getY();
             y -= SHOT_SPEED;
@@ -271,11 +272,16 @@ public class Board extends JPanel implements Runnable, Commons {
             }
         }
 
-        // aliens
-
-
-        // bombs
-
+        if(invincible) {
+            Rectangle pR = player.getBounds();
+            for (Segment seg : centipede.segments) {
+                Rectangle sR = seg.getBounds();
+                if (pR.intersects(sR)) {
+                    player.hit();
+                    invincible = true;
+                }
+            }
+        }
 
     }
 
@@ -292,7 +298,7 @@ public class Board extends JPanel implements Runnable, Commons {
                 gameInit();
                 restart = false;
             }
-            if(pause == false) {
+            if(!pause) {
                 repaint();
                 animationCycle();
             }
