@@ -24,4 +24,11 @@ public class Mushroom extends Sprite implements  Commons{
             setDying(true);
         }
     }
+
+    public void restore(){
+        if(hit != 0){
+            hit = 0;
+            this.setImage(mushroomImg);
+        }
+    }
 }

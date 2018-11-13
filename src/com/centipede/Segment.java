@@ -8,9 +8,11 @@ public class Segment extends Sprite {
 
     private Segment leftSegment;
     private Segment rightSegment;
+    private String segHitImg = "src/images/centipede/segment_hit.png";
+    private String segRevHitImg = "src/images/centipede/segment_rotate_hit.png";
     protected Image revImage;
     public int direction = -1;
-    public int head = 0;
+    //public int head = 0;
 
     public Segment(int x, int y, String img, String revImg) {
         this.x = x;
@@ -39,6 +41,16 @@ public class Segment extends Sprite {
     public void setRevImage(String img){
         ImageIcon ii = new ImageIcon(img);
         this.revImage = ii.getImage();
+    }
+
+    public void hit(){
+        hit += 1;
+        if(hit == 1){
+            this.setImage(segHitImg);
+            this.setRevImage(segRevHitImg);
+        }else if(hit == 2){
+            setDying(true);
+        }
     }
 
     public void setRightSegment(Segment rightSegment){

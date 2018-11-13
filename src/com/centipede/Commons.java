@@ -10,14 +10,15 @@ public interface Commons {
     int ALIEN_WIDTH = 12;
     int BORDER_RIGHT = 10;
     int BORDER_LEFT = 10;
-    int CHANCE = 6;
+    int CHANCE = 12;
     int DELAY = 17;
     int PLAYER_WIDTH = 14;
     int PLAYER_HEIGHT = 16;
-    int CENTIPEDE_LENGTH = 10;
+    int CENTIPEDE_LENGTH = 20;
     int SEGMENT_HEIGHT = GRID_SIZE;
     int SEGMENT_WIDTH = GRID_SIZE;
     int SHOT_SPEED = 7;
+    int INIT_SPEED = 6;
     int PLAYER_AREA_HEIGHT = 100;
     int [][] grid = new int[BOARD_HEIGHT/GRID_SIZE][BOARD_WIDTH/GRID_SIZE];
 }

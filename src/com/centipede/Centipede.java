@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Centipede implements Commons {
 
-    public ArrayList<Segment> segments;
+    public Vector<Segment> segments;
     private final String segmentImg = "src/images/centipede/segment.png";
     private final String headImg = "src/images/centipede/head.png";
     private final String backHeadImg = "src/images/centipede/head_rotate.png";
@@ -17,13 +17,13 @@ public class Centipede implements Commons {
     private final int INIT_Y = 5;
 
     public Centipede(){
-        this(CENTIPEDE_LENGTH,BOARD_WIDTH,10);
+        this(CENTIPEDE_LENGTH,BOARD_WIDTH/2 + (CENTIPEDE_LENGTH/2)*GRID_SIZE,GRID_SIZE * 2);
     };
 
     public Centipede(int s, int x, int y){
 
         this.size = s;
-        segments = new ArrayList<>();
+        segments = new Vector<>();
 
         for(int i = 0; i < s - 1; i++) {
             segments.add(new Segment(x, y, segmentImg, backSegmentImg));
@@ -54,14 +54,14 @@ public class Centipede implements Commons {
             head.setY(head.getY() + SEGMENT_HEIGHT);
         }
 
-        if (head.getX() <= BORDER_LEFT || head.direction == -1 && grid[head.getY()/GRID_SIZE][head.getX()/GRID_SIZE] == 1) {
+        if (head.getX() < BORDER_LEFT || head.direction == -1 && grid[head.getY()/GRID_SIZE][head.getX()/GRID_SIZE] == 1) {
             head.direction = 1;
             head.setX(head.getX() + (SEGMENT_WIDTH) * head.direction);
             head.setY(head.getY() + SEGMENT_HEIGHT);
         }
 
         if(head.getY() >= BOARD_HEIGHT - PLAYER_AREA_HEIGHT){
-            head.setY(BOARD_HEIGHT - PLAYER_AREA_HEIGHT - GRID_SIZE);
+            head.setY(BOARD_HEIGHT - PLAYER_AREA_HEIGHT - SEGMENT_HEIGHT);
         }
     }
 
