@@ -45,7 +45,7 @@ public class Centipede implements Commons {
                 segments.remove(idx);
                 Segment head = segments.get(idx - 1);
                 head.setHead();
-                head.direction = -head.direction;
+                //head.direction = -head.direction; //TODO Spwan mushroom here
             }
         }
     }

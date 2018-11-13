@@ -301,6 +301,11 @@ public class Board extends JPanel implements Runnable, Commons {
             }
         }
 
+        if(centipede.size == 0){
+            score += 600;
+            restore();
+        }
+
     }
 
     @Override
@@ -312,7 +317,6 @@ public class Board extends JPanel implements Runnable, Commons {
 
         while (ingame) {
             if(restart){
-                //gameOver();
                 gameInit();
                 restart = false;
             }
