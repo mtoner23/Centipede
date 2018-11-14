@@ -16,7 +16,7 @@ public class Segment extends Sprite implements Commons {
     private final String segRevImg = "src/images/centipede/segment_rotate.png";
     protected Image revImage;
     public int direction = -1;
-    public boolean head  = false;
+    public boolean head ;
     //public int head = 0;
 
     public Segment(int x, int y,boolean head) {

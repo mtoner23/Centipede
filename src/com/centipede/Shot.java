@@ -15,8 +15,8 @@ public class Shot extends Sprite {
         setImage(shotImg);
         this.x = x + H_SPACE;
         this.y = y - V_SPACE;
-        this.width = 1;
-        this.height = 6;
+        this.width = 2;
+        this.height = 12;
     }
 
 }

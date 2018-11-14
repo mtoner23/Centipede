@@ -8,6 +8,7 @@ import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
+import javax.sound.sampled.*;
 
 import static java.awt.event.KeyEvent.*;
 
@@ -28,6 +29,7 @@ public class Board extends JPanel implements Runnable, Commons {
     private boolean restart = false;
     private boolean pause = false;
     private boolean invincible = false;
+    private boolean quit = false;
     private final String explImg = "src/images/spaceinvaders/explosion.png";
     private String message = "Game Over";
 
@@ -64,12 +66,12 @@ public class Board extends JPanel implements Runnable, Commons {
     }
 
     public void gameInit() {
-
+        ingame = true;
         mushrooms = new Vector<>();
         Random r = new Random();
         score = 0;
         boolean found = false;
-        for (int i = 3 * GRID_SIZE; i < BOARD_HEIGHT - PLAYER_AREA_HEIGHT; i += GRID_SIZE) {
+        for (int i = 3 * GRID_SIZE; i < BOARD_HEIGHT - PLAYER_AREA_HEIGHT - GRID_SIZE; i += GRID_SIZE) {
             for (int j = BORDER_LEFT + GRID_SIZE; j < BOARD_WIDTH - BORDER_RIGHT - GRID_SIZE; j += GRID_SIZE) {
                 grid[ i/GRID_SIZE ][ j/GRID_SIZE ] = 0;
                 if(r.nextInt(CHANCE) == CHANCE - 1 || found) {
@@ -90,7 +92,6 @@ public class Board extends JPanel implements Runnable, Commons {
         spider = new Spider();
 
         if (animator == null || !ingame) {
-
             animator = new Thread(this);
             animator.start();
         }
@@ -112,16 +113,13 @@ public class Board extends JPanel implements Runnable, Commons {
             g.drawImage(player.getImage(), player.getX(), player.getY(), this);
         }
 
-        if (player.isDying()) {
-
-            player.die();
-            ingame = false;
-        }
     }
 
     public void drawShot(Graphics g) {
-        for(Shot s : shots){
-            g.drawImage(s.getImage(), s.getX(), s.getY(), this);
+        synchronized(shots) {
+            for (Shot s : shots) {
+                g.drawImage(s.getImage(), s.getX(), s.getY(), this);
+            }
         }
     }
 
@@ -171,6 +169,8 @@ public class Board extends JPanel implements Runnable, Commons {
             drawScore(g);
             drawSpider(g);
 
+        }else{
+            gameOver(g);
         }
 
         Toolkit.getDefaultToolkit().sync();
@@ -190,11 +190,9 @@ public class Board extends JPanel implements Runnable, Commons {
         }
     }
 
-    public void gameOver() {
+    public void gameOver(Graphics g) {
 
-        Graphics g = this.getGraphics();
-
-        setCursor(Cursor.getDefaultCursor());
+        //setCursor(Cursor.getDefaultCursor());
 
         g.setColor(Color.black);
         g.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
@@ -229,6 +227,7 @@ public class Board extends JPanel implements Runnable, Commons {
         if (player.lives == 0) {
             ingame = false;
             message = "Game Over!";
+            //gameOver();
         }
 
         // player
@@ -244,49 +243,65 @@ public class Board extends JPanel implements Runnable, Commons {
 
 
         // shot
-            Shot delete = null;
-            for(Shot s: shots) {
-                int shotX = s.getX();
-                int shotY = s.getY();
-                if (grid[shotY / GRID_SIZE][shotX / GRID_SIZE] == 1) {
-                    Mushroom mush = findMushroom(shotX / GRID_SIZE, shotY / GRID_SIZE);
-                    mush.hit();
-                    score += 1;
-                    if (mush.isDying()) {
-                        score += 4;
-                        mushrooms.remove(mush);
-                        grid[shotY / GRID_SIZE][shotX / GRID_SIZE] = 0;
-                    }
-                    delete = s;
-                    break;
-                } else {
+            ArrayList<Shot> delete = new ArrayList<>();
+            synchronized (shots) {
+                for (Shot s : shots) {
+                    int shotX = s.getX();
+                    int shotY = s.getY();
+                    if (grid[shotY / GRID_SIZE][shotX / GRID_SIZE] == 1) {
+                        Mushroom mush = findMushroom(shotX / GRID_SIZE, shotY / GRID_SIZE);
+                        mush.hit();
+                        score += 1;
+                        if (mush.isDying()) {
+                            score += 4;
+                            mushrooms.remove(mush);
+                            grid[shotY / GRID_SIZE][shotX / GRID_SIZE] = 0;
+                        }
+                        delete.add(s);
+                    } else {
                         int hit_index = 0;
                         boolean hit = false;
                         for (Segment seg : centipede.segments) {
                             if (seg.getY() / GRID_SIZE == shotY / GRID_SIZE && seg.getX() / GRID_SIZE == shotX / GRID_SIZE) {
                                 seg.hit();
                                 score += 2;
-                                delete = s;
+                                delete.add(s);
                                 hit = true;
                                 break;
                             }
                             hit_index++;
                         }
-                        if(hit){
+                        if (hit) {
                             centipede.split(hit_index);
                         }
+                    }
+
+                    Rectangle shotRect = s.getBounds();
+                    Rectangle spiderRect = spider.getBounds();
+                    if (shotRect.intersects(spiderRect)) {
+                        spider.hit();
+                        delete.add(s);
+                        score += 100;
+                        if (spider.isDying()) {
+                            score += 500;
+                            spider = new Spider();
+                            delete.add(s);
+                        }
+                    }
+
+
+                    int y = s.getY();
+                    y -= SHOT_SPEED;
+                    if (y < 0) {
+                        delete.add(s);
+                        break;
+                    } else {
+                        s.setY(y);
+                    }
                 }
-                int y = s.getY();
-                y -= SHOT_SPEED;
-                if (y < 0) {
-                    delete = s;
-                    break;
-                } else {
-                    s.setY(y);
+                for (Shot s : delete) {
+                    shots.remove(s);
                 }
-            }
-            if(delete != null){
-                shots.remove(delete);
             }
 
         if(!invincible) {
@@ -299,10 +314,18 @@ public class Board extends JPanel implements Runnable, Commons {
                     break;
                 }
             }
+            Rectangle sR = spider.getBounds();
+            if (pR.intersects(sR)) {
+                player.hit();
+                restore();
+            }
         }
 
         if(centipede.size == 0){
             score += 600;
+            if(speed >= 2) {
+                speed -= 2;
+            }
             restore();
         }
 
@@ -315,7 +338,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
         beforeTime = System.currentTimeMillis();
 
-        while (ingame) {
+        while (!quit) {
             if(restart){
                 gameInit();
                 restart = false;
@@ -340,9 +363,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
             beforeTime = System.currentTimeMillis();
         }
-
-        gameOver();
-
+        System.exit(0);
     }
 
     private void restore(){
@@ -351,6 +372,7 @@ public class Board extends JPanel implements Runnable, Commons {
         }
         centipede = new Centipede();
         shots = new Vector<>();
+        spider = new Spider();
 
     }
 
@@ -378,7 +400,9 @@ public class Board extends JPanel implements Runnable, Commons {
 
 
             if (ingame) {
-                shots.add(new Shot(x, y));
+                synchronized (shots) {
+                    shots.add(new Shot(x, y));
+                }
             }
         }
 
@@ -414,7 +438,7 @@ public class Board extends JPanel implements Runnable, Commons {
             if(key == VK_R){
                 restart = true;
             }else if(key == VK_Q){
-                ingame = false;
+                quit = true;
             }else if(key == VK_P){
                 pause = !pause;
             }

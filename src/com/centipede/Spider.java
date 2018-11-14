@@ -14,8 +14,8 @@ public class Spider extends Sprite implements Commons {
 
     public Spider(){
         setImage(spiderImg);
-        this.y = BOARD_HEIGHT - PLAYER_AREA_HEIGHT + r.nextInt(20);
-        this.x = BOARD_WIDTH - SPIDER_WIDTH - r.nextInt(20);
+        this.y = BOARD_HEIGHT - PLAYER_AREA_HEIGHT + r.nextInt(PLAYER_AREA_HEIGHT - 30);
+        this.x = r.nextInt(BOARD_WIDTH - BORDER_RIGHT);
         this.width = SPIDER_WIDTH;
         this.height = SPIDER_HEIGHT;
     }
@@ -31,7 +31,6 @@ public class Spider extends Sprite implements Commons {
 
     public void act(int x, int y){
 
-
         this.x += dx;
         this.y += dy;
 
@@ -41,9 +40,9 @@ public class Spider extends Sprite implements Commons {
             dy = -Math.abs(dy);
         }
 
-        if(this.x <= 0){
+        if(this.x <= BORDER_LEFT){
             dx = Math.abs(dx);
-        }else if(this.x >= BOARD_WIDTH - SPIDER_WIDTH){
+        }else if(this.x >= BOARD_WIDTH - SPIDER_WIDTH - BORDER_RIGHT){
             dx = -Math.abs(dx);
         }
 

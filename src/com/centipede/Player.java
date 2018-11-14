@@ -20,9 +20,6 @@ public class Player extends Sprite implements Commons {
     }
 
     public void hit(){
-        this.x = START_X;
-        this.y = START_Y;
-        //robot.mouseMove(x,y);
 
         lives -= 1;
     }
