@@ -6,16 +6,15 @@ public class Spider extends Sprite implements Commons {
     private String spiderImg = "src/images/centipede/spider.png";
 
     public int error = 10;
-    protected int speed = 3;
-    private double dx = -1.5;
-    private double dy = 1.5;
+    public static double dx = 1.5;
+    public static double dy = 1.5;
 
     Random r = new Random();
 
     public Spider(){
         setImage(spiderImg);
-        this.y = BOARD_HEIGHT - PLAYER_AREA_HEIGHT + r.nextInt(PLAYER_AREA_HEIGHT - 30);
-        this.x = r.nextInt(BOARD_WIDTH - BORDER_RIGHT);
+        this.y = BOARD_HEIGHT - PLAYER_AREA_HEIGHT - GRID_SIZE * 2 + r.nextInt(PLAYER_AREA_HEIGHT);
+        this.x = 0;
         this.width = SPIDER_WIDTH;
         this.height = SPIDER_HEIGHT;
     }
@@ -26,6 +25,9 @@ public class Spider extends Sprite implements Commons {
             error = 5;
         }else if(hit == 2){
             setDying(true);
+            dx = Math.abs(dx) + 0.5 + r.nextFloat() * 0.25 * dx;
+            dy = Math.abs(dy) + 0.5 + r.nextFloat() * 0.25 * dx;
+
         }
     }
 

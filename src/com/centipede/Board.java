@@ -30,20 +30,37 @@ public class Board extends JPanel implements Runnable, Commons {
     private boolean pause = false;
     private boolean invincible = false;
     private boolean quit = false;
-    private final String explImg = "src/images/spaceinvaders/explosion.png";
     private String message = "Game Over";
+    Robot robot;
+    private AudioInputStream audioin;
+    private Clip shotClip;
 
     private Thread animator;
+    private Thread sounds;
+
 
     //AffineTransform backup = g2d.getTransform();
 
     public Board() {
         initBoard();
+        try {
+            robot = new Robot();
+        } catch(java.awt.AWTException e){
+            System.out.println("Cannont Make Robot Object");
+        }
     }
 
     private void initBoard() {
 
         System.setProperty("apple.awt.fullscreenhidecursor","true");
+
+        try {
+            audioin = AudioSystem.getAudioInputStream(new java.io.File("src/audio/centipede/shot.wav"));
+            shotClip = AudioSystem.getClip();
+            shotClip.open(audioin);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
         addKeyListener(new Keyboard());
         Mouse m = new Mouse();
@@ -70,6 +87,10 @@ public class Board extends JPanel implements Runnable, Commons {
         mushrooms = new Vector<>();
         Random r = new Random();
         score = 0;
+        speed = INIT_SPEED;
+        spider.dx = 1.5;
+        spider.dy = 1.5;
+
         boolean found = false;
         for (int i = 3 * GRID_SIZE; i < BOARD_HEIGHT - PLAYER_AREA_HEIGHT - GRID_SIZE; i += GRID_SIZE) {
             for (int j = BORDER_LEFT + GRID_SIZE; j < BOARD_WIDTH - BORDER_RIGHT - GRID_SIZE; j += GRID_SIZE) {
@@ -141,7 +162,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
         g.setColor(Color.white);
         g.setFont(small);
-        g.drawString(Integer.toString(score),5*PLAYER_WIDTH,PLAYER_HEIGHT-2);
+        g.drawString(Integer.toString(score) + "        'R' to restart \'Q' to quit",5*PLAYER_WIDTH,PLAYER_HEIGHT-2);
     }
 
     public void drawSpider(Graphics g){
@@ -159,12 +180,11 @@ public class Board extends JPanel implements Runnable, Commons {
 
         if (ingame) {
 
-            //g.drawLine(0, GROUND, BOARD_WIDTH, GROUND);
-            drawGrid(g);
-            drawPlayer(g);
+            //drawGrid(g);
             drawShot(g);
             drawCentipede(g);
             drawMushrooms(g);
+            drawPlayer(g);
             drawLives(g);
             drawScore(g);
             drawSpider(g);
@@ -222,6 +242,12 @@ public class Board extends JPanel implements Runnable, Commons {
         return hit;
     }
 
+    public void resetMouse(){
+        Point p = getLocationOnScreen();
+
+        robot.mouseMove(START_X + (int)p.getX(), START_Y + (int)p.getY());
+    }
+
     public void animationCycle() {
 
         if (player.lives == 0) {
@@ -233,7 +259,7 @@ public class Board extends JPanel implements Runnable, Commons {
         // player
 
         //Centipede Movement
-        if(wait == speed) {
+        if(wait >= speed) {
             centipede.act();
             wait = 0;
         }
@@ -243,7 +269,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
 
         // shot
-            ArrayList<Shot> delete = new ArrayList<>();
+            Vector<Shot> delete = new Vector<>();
             synchronized (shots) {
                 for (Shot s : shots) {
                     int shotX = s.getX();
@@ -285,6 +311,7 @@ public class Board extends JPanel implements Runnable, Commons {
                         if (spider.isDying()) {
                             score += 500;
                             spider = new Spider();
+
                             delete.add(s);
                         }
                     }
@@ -310,6 +337,7 @@ public class Board extends JPanel implements Runnable, Commons {
                 Rectangle sR = seg.getBounds();
                 if (pR.intersects(sR)) {
                     player.hit();
+                    resetMouse();
                     restore();
                     break;
                 }
@@ -317,6 +345,7 @@ public class Board extends JPanel implements Runnable, Commons {
             Rectangle sR = spider.getBounds();
             if (pR.intersects(sR)) {
                 player.hit();
+                resetMouse();
                 restore();
             }
         }
@@ -326,6 +355,7 @@ public class Board extends JPanel implements Runnable, Commons {
             if(speed >= 2) {
                 speed -= 2;
             }
+            System.out.println(speed);
             restore();
         }
 
@@ -341,6 +371,7 @@ public class Board extends JPanel implements Runnable, Commons {
         while (!quit) {
             if(restart){
                 gameInit();
+                resetMouse();
                 restart = false;
             }
             if(!pause) {
@@ -400,6 +431,11 @@ public class Board extends JPanel implements Runnable, Commons {
 
 
             if (ingame) {
+                if (shotClip.isRunning())
+                    shotClip.stop();   // Stop the player if it is still running
+                shotClip.setFramePosition(0); // rewind to the beginning
+                shotClip.start();     // Start playing
+
                 synchronized (shots) {
                     shots.add(new Shot(x, y));
                 }
