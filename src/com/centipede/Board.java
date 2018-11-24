@@ -30,13 +30,14 @@ public class Board extends JPanel implements Runnable, Commons {
     private boolean pause = false;
     private boolean invincible = false;
     private boolean quit = false;
+    private boolean newShot = true;
     private String message = "Game Over";
     Robot robot;
-    private AudioInputStream audioin;
-    private Clip shotClip;
+
+
 
     private Thread animator;
-    private Thread sounds;
+    private Sound sounds;
 
 
     //AffineTransform backup = g2d.getTransform();
@@ -54,13 +55,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
         System.setProperty("apple.awt.fullscreenhidecursor","true");
 
-        try {
-            audioin = AudioSystem.getAudioInputStream(new java.io.File("src/audio/centipede/shot.wav"));
-            shotClip = AudioSystem.getClip();
-            shotClip.open(audioin);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+
 
         addKeyListener(new Keyboard());
         Mouse m = new Mouse();
@@ -112,8 +107,12 @@ public class Board extends JPanel implements Runnable, Commons {
         centipede = new Centipede();
         spider = new Spider();
 
+        if(sounds == null){
+            sounds = new Sound();
+            sounds.start();
+        }
         if (animator == null || !ingame) {
-            animator = new Thread(this);
+            animator = new Thread(this,"animation");
             animator.start();
         }
     }
@@ -279,8 +278,8 @@ public class Board extends JPanel implements Runnable, Commons {
                         mush.hit();
                         score += 1;
                         if (mush.isDying()) {
-                            score += 4;
-                            mushrooms.remove(mush);
+                                score += 4;
+                                mushrooms.remove(mush);
                             grid[shotY / GRID_SIZE][shotX / GRID_SIZE] = 0;
                         }
                         delete.add(s);
@@ -369,12 +368,12 @@ public class Board extends JPanel implements Runnable, Commons {
         beforeTime = System.currentTimeMillis();
 
         while (!quit) {
-            if(restart){
+            if (restart) {
                 gameInit();
                 resetMouse();
                 restart = false;
             }
-            if(!pause) {
+            if (!pause) {
                 repaint();
                 animationCycle();
             }
@@ -394,6 +393,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
             beforeTime = System.currentTimeMillis();
         }
+        sounds.stopMusic();
         System.exit(0);
     }
 
@@ -431,11 +431,8 @@ public class Board extends JPanel implements Runnable, Commons {
 
 
             if (ingame) {
-                if (shotClip.isRunning())
-                    shotClip.stop();   // Stop the player if it is still running
-                shotClip.setFramePosition(0); // rewind to the beginning
-                shotClip.start();     // Start playing
 
+                sounds.shoot();
                 synchronized (shots) {
                     shots.add(new Shot(x, y));
                 }
@@ -477,6 +474,8 @@ public class Board extends JPanel implements Runnable, Commons {
                 quit = true;
             }else if(key == VK_P){
                 pause = !pause;
+            }else if(key == VK_M){
+                sounds.mute();
             }
         }
     }

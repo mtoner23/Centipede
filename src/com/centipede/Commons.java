@@ -21,7 +21,7 @@ public interface Commons {
     int SEGMENT_HEIGHT = GRID_SIZE;
     int SEGMENT_WIDTH = GRID_SIZE;
     int SHOT_SPEED = 9;
-    int INIT_SPEED = 9;
+    int INIT_SPEED = 11;
     int PLAYER_AREA_HEIGHT = 100;
     int START_Y = BOARD_HEIGHT - PLAYER_AREA_HEIGHT - GRID_SIZE;
     int START_X = BOARD_WIDTH / 2;
